@@ -1,0 +1,376 @@
+1. What This App Is Made Of :
+
+A standard MERN stack application consists of three main pieces:
+Frontend (React.js): The user interface and admin dashboard where users browse products and make purchases.
+
+Backend (Node.js & Express.js): The API server that processes payments, handles product queries, and manages business logic.
+
+Database (MongoDB): The database storing users, orders, and product details.  
+
+Direct EC2 Deployment (Simplest Path)
+You deploy the application directly onto a single AWS EC2 virtual machine.
+
+    How it works: You use Terraform to spin up an EC2 instance, install Node.js/Nginx via shell scripts, clone the GitHub repository onto the server, and connect it to MongoDB Atlas (cloud database).
+
+    Best for: Learning fundamental server setup, SSH connections, and basic cloud automation.
+
+Dockerized Container Deployment (Recommended Next Step)
+You containerize the frontend and backend using Docker, then run them anywhere seamlessly.
+
+    How it works: You write a Dockerfile for the Node backend and React frontend, and combine them using docker-compose. You then run these containers on an EC2 instance or AWS ECS.
+
+    Best for: Ensuring the app runs identically on your local machine and in the cloud, removing environment configuration issues.
+
+EKS Kubernetes Cluster (Advanced Production Path)
+You deploy the containerized app into an AWS EKS Kubernetes cluster for high availability and auto-scaling.
+
+    How it works: You build the Docker images, upload them to Amazon ECR, write Kubernetes deployment.yaml and service.yaml manifests, and deploy them using kubectl to worker nodes created via Terraform.
+
+    Best for: Simulating real-world production environments where services need automatic failover and load balancing.
+
+STEPS N PROCESSES
+Step 1: Cloning the Repository
+The very first action in local development is downloading the project's source code from GitHub onto your local computer.
+
+Step 2: Inspecting the Project Structure & Installing Backend Dependencies
+MERN projects typically separate the server code (Backend) from the user interface (Frontend). We need to install the software libraries (packages) required by the backend first.
+
+Move into the backend folder (or inspect if package.json is in the root directory) and install backend packages:
+npm install
+
+Step 3: Setting Up Environment Variables (.env)
+Backend applications need sensitive information—like database passwords, secret keys, and port numbers—to function properly. Instead of hardcoding these inside the code, Node.js reads them from a hidden file named .env
+
+Step 3 (Continued): Setting up the Backend .env
+For a MERN project, the .env file belongs in the Backend root folder because that is where the Express server connects to MongoDB and signs secret tokens.
+cd Backend,cp .env.example .env or touch .env 
+What should go inside the Backend .env file?
+Inside your backend .env, paste these standard MERN variables:
+PORT=5000
+MONGO_URI=mongodb://127.0.0.1:27017/ecommerce
+JWT_SECRET=mysecretkey12345
+1. Purpose
+    PORT: Tells the backend Node/Express server which network port to run on (Port 5000 is standard).
+
+    MONGO_URI: Tells the app where your MongoDB database lives.
+
+    JWT_SECRET: A secret string used to encrypt user login tokens.
+
+1. How to get the MONGO_URI You have two choices for your database:
+Choice A: Local MongoDB (Free & Offline)
+If you have MongoDB installed on your computer, the default connection URL is:mongodb://127.0.0.1:27017/ecommerce
+127.0.0.1:27017 is your local computer's database port.
+/ecommerce is the name MongoDB will automatically give to your project's database.
+
+Choice B: MongoDB Atlas (Free Cloud Database - Recommended if you don't have local MongoDB)Go to mongodb.com/cloud/atlas and create a free account.Create a free M0 Cluster.
+Create a database username and password under Database Access.Under Network Access, add 0.0.0.0/0 (allow access from anywhere).Click Connect $\rightarrow$ Drivers to copy your connection string. It will look like this:mongodb+sandbox://username:password@cluster0.abcde.mongodb.net/ecommerce
+
+Installing MongoDB on Ubuntu:
+#!/bin/bash
+
+# Exit immediately if a command fails
+set -e
+
+echo "=== Installing Prerequisites ==="
+sudo apt-get install gnupg curl -y
+
+echo "=== Importing MongoDB GPG Key ==="
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+
+echo "=== Adding MongoDB Repository ==="
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+echo "=== Updating Package List & Installing MongoDB ==="
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+echo "=== Starting & Enabling MongoDB Service ==="
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+echo "=== Checking Service Status ==="
+sudo systemctl status mongod
+
+chmod +x install_mongo.sh && ./install_mongo.sh
+
+Step 2: Install MongoDB directly
+Now run the package manager update and install MongoDB directly:
+sudo apt-get update && sudo apt-get install -y mongodb-org
+
+Step 3: Start the MongoDB Service
+Once installation completes, enable and start the service:
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+Step 4: Confirm MongoDB is Running
+Check the service status:
+sudo systemctl status mongod
+
+The JWT_SECRET is not generated by an external service, nor do you need to download it. It is a private passphrase of your choice used by your server code to securely sign and verify authentication tokens (JSON Web Tokens).
+
+Method 1: Create a Random Secret Phrase (Recommended)
+You can choose any long, unique combination of characters.
+If you want a cryptographically secure string, run this single command in your terminal to generate one automatically:
+"openssl rand -hex 32"
+
+Step 5: Testing the Backend Server
+Now that MongoDB is active and your environment variables are configured, start the backend server to verify the database connection:
+    Make sure you are inside the Backend directory:
+        cd ~/Desktop/DEVOPS/Full_MERN_Stack_Ecommerce_Project_1/Backend
+    Run the start script defined in your package.json:
+        npm start
+
+Next Milestone: Moving to the Frontend!
+    Now that the Backend is running on http://localhost:5000, we can start the Frontend so it can talk to your backend.
+Commands to execute (in a new terminal):
+    Navigate to the Frontend directory:
+        cd ~/Desktop/DEVOPS/Full_MERN_Stack_Ecommerce_Project_1/Frontend
+    Check if frontend dependencies are installed:
+        ls node_modules
+    (If node_modules doesn't exist, 
+        run npm install first).
+    Start the React development server:
+        npm start
+
+
+Step 1: Verify the Frontend-to-Backend Connection
+Before adding complex features, let's make sure your React frontend can successfully talk to your Node/Express backend.
+    Check your running processes:
+        Terminal 1 (Backend): Running npm start in .../Backend (Listening on PORT 5000).
+
+        Terminal 2 (Frontend): Running npm start in .../Frontend (Listening on PORT 3000).
+    Open your browser's Developer Tools:
+        In your browser on http://localhost:3000, press F12 (or right-click anywhere and select Inspect).
+        Click on the Console tab.
+    Check for CORS or network errors:
+        Look at the console messages. Are there any red network error messages complaining about http://localhost:5000?
+
+
+Step 2: Set Up a Free MongoDB Atlas Database
+    Go to mongodb.com/cloud/atlas and sign in or create a free account.
+    Click Create a Deployment (or Build a Database) and select the M0 Free Tier.
+    Set up Database Access:
+        Create a database user (e.g., username: admin, set a strong password). Save this password!
+    Set up Network Access:
+        Go to Network Access in the left sidebar.
+        Click Add IP Address and choose Allow Access from Anywhere (0.0.0.0/0). (This allows your deployment host to connect to it).
+    Get your Connection String:
+        Go to Database -> click Connect on your cluster -> select Drivers.
+        Copy the connection string format:
+        mongodb+srv://<username>:<password>@cluster0.xxx.mongodb.net/
+Step 3 (Updated): Deploy Your Backend on AWS EC2
+1. Launch & Connect to Your EC2 Instance
+    Launch an Ubuntu 24.04 / 22.04 LTS instance on AWS EC2.
+    Ensure your Security Group allows inbound traffic on:
+        Port 22 (SSH)
+        Port 5000 (Your Node.js backend port)
+    Connect via terminal:
+
+Phase 1: Local File Setup
+
+1. Create a .gitignore file
+Create or update .gitignore inside your Terraform project directory to ensure secret files are ignored:
+Plaintext
+
+# Exclude plain-text secret variables and private keys
+terraform.tfvars
+*.pem
+.terraform/
+terraform.tfstate*
+
+2. Define variables in variables.tf
+Create a file named variables.tf to declare input variables:
+Terraform
+
+variable "aws_region" {
+  type    = string
+  default = "us-east-1"
+}
+
+variable "mongodb_url" {
+  type      = string
+  sensitive = true
+}
+
+variable "jwt_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "github_repo_url" {
+  type        = string
+  description = "Your MERN project GitHub repository URL"
+}
+
+3. Store secrets in terraform.tfvars
+Create a file named terraform.tfvars locally on your computer. Terraform automatically reads values from this file, keeping passwords out of your main .tf code:
+Terraform
+
+mongodb_url     = "mongodb+srv://admin:YourPassword@cluster0.xxx.mongodb.net/dbname"
+jwt_secret      = "your_super_secret_jwt_key"
+github_repo_url = "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+
+Phase 2: Create Main Infrastructure Code (main.tf)
+
+Create your main.tf file. This references var.mongodb_url and var.jwt_secret directly inside your EC2 user_data boot script:
+Terraform
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# 1. Create Security Group for Port 22 (SSH) & Port 5000 (Backend)
+resource "aws_security_group" "backend_sg" {
+  name        = "mern-backend-sg"
+  description = "Allow inbound traffic for SSH and Backend API"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# 2. Deploy EC2 Instance
+resource "aws_instance" "backend_server" {
+  ami           = "ami-0c7217cdde317cfec" # Replace with valid Ubuntu AMI for your region
+  instance_type = "t2.micro"
+
+  vpc_security_group_ids = [aws_security_group.backend_sg.id]
+
+  # Boot script runs software installation and passes secrets into .env
+  user_data = <<-EOF
+              #!/bin/bash
+              set -e
+
+              # Update and install Node.js + PM2
+              apt update -y && apt install -y git curl
+              curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+              apt install -y nodejs
+              npm install -g pm2
+
+              # Clone Repo
+              cd /home/ubuntu
+              git clone ${var.github_repo_url} app
+              cd app/Backend
+
+              # Install dependencies
+              npm install
+
+              # Generate .env file dynamically
+              cat <<EOT > .env
+              PORT=5000
+              MONGODB_URL="${var.mongodb_url}"
+              JWT_SECRET="${var.jwt_secret}"
+              EOT
+
+              # Set correct ownership & start application via PM2
+              chown -R ubuntu:ubuntu /home/ubuntu/app
+              sudo -u ubuntu pm2 start index.js --name "mern-backend"
+              sudo -u ubuntu pm2 save
+              EOF
+
+  tags = {
+    Name = "MERN-Backend-Server"
+  }
+}
+
+output "ec2_public_ip" {
+  value       = aws_instance.backend_server.public_ip
+  description = "Public IP address of the deployed backend server"
+}
+
+Phase 3: Encrypt Secrets using git-secret
+
+Execute these terminal commands sequentially inside your Terraform root directory to encrypt terraform.tfvars:
+
+    Initialize git-secret:
+    Bash
+
+    git secret init
+
+    Register your GPG identity:
+    Bash
+
+    git secret tell your-gpg-email@example.com
+
+    Register terraform.tfvars for encryption:
+    Bash
+
+    git secret add terraform.tfvars
+
+    Encrypt the file:
+    Bash
+
+    git secret hide
+
+This generates terraform.tfvars.secret.
+Phase 4: Commit to Git and Deploy Infrastructure
+
+    Push safe code to GitHub:
+    Bash
+
+    git add main.tf variables.tf .gitignore .gitsecret/ terraform.tfvars.secret
+    git commit -m "Provision backend infrastructure using Terraform and git-secret"
+    git push origin main
+
+    Run Terraform to deploy:
+    Bash
+
+    terraform init
+    terraform plan
+    terraform apply -auto-approve
+
+Phase 5: Verification
+
+Once Terraform finishes running:
+
+    Copy the ec2_public_ip printed in your terminal output.
+
+    Test your live endpoint in browser or terminal:
+    Bash
+
+    curl http://<YOUR_EC2_PUBLIC_IP>:5000/api/product
+
+Local .env File (Inside Backend/.env)
+
+    Change MONGODB_URL=mongodb://127.0.0.1:27017/ecommerce to your MongoDB Atlas connection string (e.g., mongodb+srv://admin:Password@cluster0.xxx.mongodb.net/ecommerce).
+
+    This allows your local Node.js server to talk directly to your cloud MongoDB database while testing on your machine.
+
+Terraform Secret File (terraform.tfvars)
+
+    Put your MongoDB Atlas string here too:
+    Terraform
+
+    mongodb_url = "mongodb+srv://admin:YourPassword@cluster0.xxx.mongodb.net/ecommerce"
+    jwt_secret  = "6d0368553c88105c12580fec0eaef55ce4b19a19755dc9dfe4d70efd9c52ccab"
+    github_repo_url = "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+
+    This is the file you encrypt using git secret add terraform.tfvars and git secret hide. Terraform uses these values to build your production server on AWS EC2 automatically!
+
