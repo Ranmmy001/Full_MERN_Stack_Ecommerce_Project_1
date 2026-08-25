@@ -17,8 +17,13 @@ services:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=${REACT_APP_API_URL}
+        - VITE_API_URL=${VITE_API_URL}
     ports:
       - "3000:80"
+    env_file:
+      - ./Frontend/.env
     depends_on:
       - backend
     restart: always
@@ -27,8 +32,13 @@ services:
     build:
       context: ./Admin
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=${REACT_APP_API_URL}
+        - VITE_API_URL=${VITE_API_URL}
     ports:
       - "3001:80"
+    env_file:
+      - ./Admin/.env
     depends_on:
       - backend
     restart: always
