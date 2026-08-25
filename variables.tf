@@ -15,5 +15,6 @@ variable "jwt_secret" {
 
 variable "github_repo_url" {
   type        = string
-  description = "https://github.com/Ranmmy001/Full_MERN_Stack_Ecommerce_Project_1.git"
+  description = "GitHub repository URL to clone"
+  default     = "https://github.com/Ranmmy001/Full_MERN_Stack_Ecommerce_Project_1.git"
 }

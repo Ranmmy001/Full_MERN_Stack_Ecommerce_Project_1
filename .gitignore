@@ -7,3 +7,5 @@ note
 .gitsecret/keys/random_seed
 !*.secret
 .env
+id_rsa
+id_rsa.pub
