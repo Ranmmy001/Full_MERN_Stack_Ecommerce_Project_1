@@ -26,7 +26,7 @@ export const loginUser = createAsyncThunk(
 
 export const getuserProductWishlist = createAsyncThunk(
   "user/wishlist",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       return await authService.getUserWislist();
     } catch (error) {
@@ -70,7 +70,7 @@ export const deleteUserCart = createAsyncThunk(
 
 export const getOrders = createAsyncThunk(
   "user/orders/get",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       return await authService.getUserOrders();
     } catch (error) {
@@ -183,7 +183,10 @@ export const authSlice = createSlice({
         state.isSuccess = false;
         state.message = action.error;
         if (state.isError === true) {
-          toast.error(action.payload.response.data.message);
+          // toast.error(action.payload.response.data.message);
+          toast.error(
+            action.payload?.response?.data?.message || action.error.message
+          );
         }
       })
       .addCase(loginUser.pending, (state) => {
@@ -206,6 +209,7 @@ export const authSlice = createSlice({
         state.isSuccess = false;
         state.message = action.error;
         if (state.isError === true) {
+          // toast.error(action.payload.response.data.message);
           toast.error(action.payload.response.data.message);
         }
       })

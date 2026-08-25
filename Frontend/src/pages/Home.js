@@ -215,6 +215,7 @@ const Home = () => {
           </div>
           {productState &&
             productState?.map((item, index) => {
+              console.log(item)
               if (item.tags === "featured") {
                 return (
                   <div key={index} className={"col-3"}>
@@ -230,7 +231,7 @@ const Home = () => {
                           />
                         </button>
                       </div>
-                      <div className="product-image">
+                      {/* <div className="product-image">
                         <img
                           src={item?.images[0]?.url}
                           //className="img-fluid d"
@@ -247,7 +248,7 @@ const Home = () => {
                           width={"260px"}
                           onClick={() => navigate("/product/" + item?._id)}
                         />
-                      </div>
+                      </div> */}
                       <div className="product-details">
                         <h6 className="brand">{item?.brand}</h6>
                         <h5 className="product-title">
@@ -368,7 +369,7 @@ const Home = () => {
                     brand={item?.brand}
                     totalrating={item?.totalrating.toString()}
                     price={item?.price}
-                    img={item?.images[0].url}
+                    // img={item?.images[0].url}
                     sold={item?.sold}
                     quantity={item?.quantity}
                   />
@@ -401,7 +402,7 @@ const Home = () => {
                           />
                         </button>
                       </div>
-                      <div className="product-image">
+                      {/* <div className="product-image">
                         <img
                           src={item?.images[0].url}
                           // className="img-fluid d"
@@ -418,7 +419,7 @@ const Home = () => {
                           width={"100%"}
                           onClick={() => navigate("/product/" + item?._id)}
                         />
-                      </div>
+                      </div> */}
                       <div className="product-details">
                         <h6 className="brand">{item?.brand}</h6>
                         <h5 className="product-title">
@@ -509,7 +510,7 @@ const Home = () => {
                       id={item?._id}
                       title={item?.title}
                       description={item?.description}
-                      image={item?.images[0]?.url}
+                      // image={item?.images[0]?.url}
                       date={moment(item?.createdAt).format(
                         "MMMM Do YYYY, h:mm a"
                       )}
