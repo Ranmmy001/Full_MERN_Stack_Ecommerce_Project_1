@@ -82,53 +82,38 @@ resource "aws_instance" "app_server" {
   user_data = <<-EOF
               #!/bin/bash
               set -e
+              export DEBIAN_FRONTEND=noninteractive
 
-              # 1. Update system and install Docker + Docker Compose plugin + Git + Curl
+              # Update system and install prerequisite tools
               apt-get update -y
-              apt-get install -y git docker.io docker-compose-plugin curl
+              apt-get install -y curl git ca-certificates gnupg docker-compose-plugin
 
-              # 2. Enable and start Docker service
-              systemctl enable docker
-              systemctl start docker
+              # Install Docker using official script
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sh get-docker.sh
+
+              # Enable Docker service and grant permissions to ubuntu user
+              systemctl enable --now docker
               usermod -aG docker ubuntu
 
-              # 3. Dynamically retrieve EC2 Public IP address at runtime
+              # Get server public IP via IMDSv2
               TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
               PUBLIC_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4)
 
-              # 4. Clone application repository
-              cd /home/ubuntu
-              git clone ${var.github_repo_url} app
-              cd app
-
-              # 5. Generate .env files for Backend, Frontend, and Admin
-              cat <<EOT > Backend/.env
-              PORT=5000
-              MONGO_URI="${var.mongodb_url}"
-              JWT_SECRET="${var.jwt_secret}"
-              EOT
-
-              cp Backend/.env .env
-
-              if [ -d "Frontend" ]; then
-                cat <<EOT > Frontend/.env
-                REACT_APP_API_URL="http://$PUBLIC_IP:5000"
-                VITE_API_URL="http://$PUBLIC_IP:5000"
-              EOT
-              fi
-
-              if [ -d "Admin" ]; then
-                cat <<EOT > Admin/.env
-                REACT_APP_API_URL="http://$PUBLIC_IP:5000"
-                VITE_API_URL="http://$PUBLIC_IP:5000"
-              EOT
-              fi
-
-              # 6. Fix permissions and spin up containers
+              # Clone application repository and grant permissions to ubuntu user
+              mkdir -p /home/ubuntu/app
+              git clone https://github.com/Ranmmy001/Full_MERN_Stack_Ecommerce_Project_1.git /home/ubuntu/app
               chown -R ubuntu:ubuntu /home/ubuntu/app
+              cd /home/ubuntu/app
+
+              # Set environment variables for builds
+              echo "REACT_APP_API_URL=http://$PUBLIC_IP:5000" > Frontend/.env
+              echo "REACT_APP_API_URL=http://$PUBLIC_IP:5000" > Admin/.env
+              echo "PORT=5000" > Backend/.env
+
+              # Build and launch application containers
               docker compose up -d --build
               EOF
-
   tags = {
     Name = "MERN-Containerized-Server"
   }
