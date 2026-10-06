@@ -12,8 +12,9 @@ const createProduct = asyncHandler(async (req, res) => {
     const newProduct = await Product.create(req.body);
     res.json(newProduct);
   } catch (error) {
-    throw new Error(error);
-  }
+  console.error("CREATE PRODUCT ERROR:", error);
+  res.status(500).json({ message: error.message });
+}
 });
 
 const updateProduct = asyncHandler(async (req, res) => {

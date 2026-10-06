@@ -218,7 +218,7 @@ const Home = () => {
               console.log(item)
               if (item.tags === "featured") {
                 return (
-                  <div key={index} className={"col-3"}>
+                  <div key={index} className={"col-3"} onClick={() => navigate("/product/" + item?._id)} style={{ cursor: "pointer" }}>
                     <div className="product-card position-relative">
                       <div className="wishlist-icon position-absolute">
                         <button className="border-0 bg-transparent">
@@ -231,9 +231,11 @@ const Home = () => {
                           />
                         </button>
                       </div>
-                      {/* <div className="product-image">
+                      <div className="product-image">
                         <img
-                          src={item?.images[0]?.url}
+                          src={item?.images[0]?.url ? item?.images[0]?.url 
+                                : "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg"
+                          }
                           //className="img-fluid d"
                           alt="product image"
                           height={"250px"}
@@ -241,14 +243,16 @@ const Home = () => {
                           onClick={() => navigate("/product/" + item?._id)}
                         />
                         <img
-                          src={item?.images[0]?.url}
+                           src={item?.images[0]?.url ? item?.images[0]?.url 
+                                : "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg"
+                          }
                           //className="img-fluid d"
                           alt="product image"
                           height={"250px"}
                           width={"260px"}
                           onClick={() => navigate("/product/" + item?._id)}
                         />
-                      </div> */}
+                      </div>
                       <div className="product-details">
                         <h6 className="brand">{item?.brand}</h6>
                         <h5 className="product-title">

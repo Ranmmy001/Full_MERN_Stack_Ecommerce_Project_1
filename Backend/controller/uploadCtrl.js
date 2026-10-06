@@ -22,8 +22,11 @@ const uploadImages = asyncHandler(async (req, res) => {
     });
     res.json(images);
   } catch (error) {
-    throw new Error(error);
-  }
+  console.error("UPLOAD ERROR:", error);
+  res.status(500).json({
+    message: error.message,
+  });
+}
 });
 const deleteImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
