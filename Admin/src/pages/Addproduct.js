@@ -86,6 +86,7 @@ const Addproduct = () => {
     }
     if (isError) {
       toast.error("Something Went Wrong!");
+      console.log(productImages)
     }
   }, [isSuccess, isError, isLoading]);
   const coloropt = [];

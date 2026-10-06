@@ -7,10 +7,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    env_file:
-      - ./Backend/.env
     environment:
       - PORT=5000
+      - MONGODB_URL=mongodb+srv://olaranmmy_db_user:4j4Of5aSp2qTJH04@cluster0.mha5l7e.mongodb.net/ecommerce?retryWrites=true&w=majority
+      - MONGO_URI=mongodb+srv://olaranmmy_db_user:4j4Of5aSp2qTJH04@cluster0.mha5l7e.mongodb.net/ecommerce?retryWrites=true&w=majority
+      - JWT_SECRET=6d0368553c88105c12580fec0eaef55ce4b19a19755dc9dfe4d70efd9c52ccab
     restart: always
 
   frontend:
